@@ -99,7 +99,8 @@ Canvas render(const Song& s,const std::vector<BarRef>& refs,const Layout& l,size
         c.text(x+43,y,"CAPO",1,true);
         c.text(x+43,y+12,std::to_string(*s.capo),3,true);
     }
-    c.text(20,49,fit(s.sections[now.section].name+"  /  BAR "+std::to_string(now.bar+1)+"  /  "+std::to_string(int(currentBar.bpm*rate))+" QPM",l.width-210,2),2,true);
+    int infoScale=l.width<600?1:2;
+    c.text(20,49,fit(s.sections[now.section].name+"  /  BAR "+std::to_string(now.bar+1)+"  /  "+std::to_string(int(currentBar.bpm*rate))+" QPM",l.width-210,infoScale),infoScale,true);
     c.text(l.width-166,49,playing?"PLAYING":"PAUSED",2,true);c.fill({20,73,l.width-40,2},true);
     for(auto& cell:l.cells) {
         auto r=cell.bounds;auto ref=refs[cell.index];auto& b=s.sections[ref.section].bars[ref.bar];bool active=cell.index==current;
@@ -138,12 +139,18 @@ Canvas render(const Song& s,const std::vector<BarRef>& refs,const Layout& l,size
         }
     }
     c.fill({20,l.height-42,l.width-40,1},true);
+    if(l.width<600) {
+        c.text(12,l.height-29,"< PREV",2,true);c.text(114,l.height-29,"RESTART",2,true);
+        c.text(216,l.height-29,playing?"PAUSE":"PLAY",2,true);c.text(306,l.height-29,"NEXT >",2,true);
+        c.text(408,l.height-29,std::to_string(l.page+1)+"/"+std::to_string(l.pages),1,true,l.width-416);
+    } else {
     c.text(20,l.height-29,"< PREV",2,true);c.text(190,l.height-29,"RESTART",2,true);
     c.text(360,l.height-29,playing?"PAUSE":"PLAY",2,true);c.text(510,l.height-29,"NEXT >",2,true);
     c.text(l.width-106,l.height-27,std::to_string(l.page+1)+"/"+std::to_string(l.pages),2,true);
+    }
     return c;
 }
-Application::Application(const Song& s,Display& d):song_(&s),display_(d),timeline(expand(s)){}
+Application::Application(const Song& s,Display& d,int w,int h):song_(&s),display_(d),timeline(expand(s)),width(w),height(h){}
 const Bar& Application::bar() const {auto r=timeline[current];return song_->sections[r.section].bars[r.bar];}
 double Application::beat() const {return timeline.empty()?1:1+elapsed/seconds(bar())*bar().length.value();}
 void Application::seek(size_t i){if(timeline.empty())return;current=std::min(i,timeline.size()-1);elapsed=0;draw();}
@@ -173,14 +180,14 @@ void Application::tick(double dt) {
     if(changed)draw();
 }
 void Application::draw(bool full) {
-    auto l=layout(timeline.size(),current,800,480,perRow);
+    auto l=layout(timeline.size(),current,width,height,perRow);
     auto frame=render(*song_,timeline,l,current,playing,lyrics,rate);
-    if(sleeping){frame=Canvas();frame.text(220,220,"BEATTAB SLEEP",4,true);}
+    if(sleeping){frame=Canvas(width,height);frame.text((width-288)/2,height/2,"BEATTAB SLEEP",4,true);}
     display_.request(frame,full || l.page!=shownPage_?Refresh::Full:Refresh::Partial);shownPage_=l.page;
 }
 void Application::touch(int x,int y) {
     if(sleeping)return;
-    if(y>=438){if(x<160)action(Action::Previous);else if(x<330)action(Action::Restart);else if(x<490)action(Action::Toggle);else if(x<670)action(Action::Next);return;}
-    auto l=layout(timeline.size(),current,800,480,perRow);for(auto& cell:l.cells)if(cell.bounds.contains(x,y)){seek(cell.index);return;}
+    if(y>=height-42){int scaled=x*800/width;if(scaled<160)action(Action::Previous);else if(scaled<330)action(Action::Restart);else if(scaled<490)action(Action::Toggle);else if(scaled<670)action(Action::Next);return;}
+    auto l=layout(timeline.size(),current,width,height,perRow);for(auto& cell:l.cells)if(cell.bounds.contains(x,y)){seek(cell.index);return;}
 }
 }

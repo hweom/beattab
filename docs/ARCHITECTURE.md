@@ -7,9 +7,9 @@
 - Model: sections, bars, rational positions, timed event variants, arrangements.
 - Format: text to model, diagnostics, deterministic model to text.
 - Layout: viewport and metrics to page/cell rectangles. No SDL or device driver.
-- Renderer: layout/model to a packed 1-bit Canvas (48,000 bytes at 800×480).
+- Renderer: layout/model to a packed 1-bit Canvas (48,000 bytes at 480×800).
 - Application: portable timeline state, actions, touch hit testing, playback clock,
-  and explicit Display requests. The 800×480 application viewport is the initial
+  and explicit Display requests. The 480×800 portrait application viewport with two bars per row is the default
   product profile; the layout and raster implementations accept other dimensions.
 
 The core uses C++17 and the standard library, no exceptions or RTTI APIs, and
@@ -53,7 +53,7 @@ The SDK integration and flashable firmware are explicitly not part of this miles
 - Full refresh on page changes; partial on same-page state changes. Bar highlighting
   changes only once per bar. Fast tempos can outrun the simulated screen: BUSY status
   exposes the delay and the latest-frame queue prevents an unbounded backlog.
-- Lyrics below are the default. Inside and timeline-aligned modes are evaluation
+- Timeline-aligned lyrics are the default. Left-aligned Below and Inside modes are evaluation
   variants. All use identical musical coordinates and bar boundaries.
 - Library state is not stored in canonical songs. Future favorites/setlists/recent
   history should live in the ignored `state/` directory, keyed by stable song IDs.

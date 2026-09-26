@@ -38,9 +38,10 @@ public:
     size_t current=0;
     double elapsed=0,rate=1;
     bool playing=false,sleeping=false;
-    int perRow=3;
+    int width=480,height=800;
+    int perRow=2;
     Lyrics lyrics=Lyrics::Timeline;
-    explicit Application(const Song& song,Display& display);
+    explicit Application(const Song& song,Display& display,int width=480,int height=800);
     const Bar& bar() const;
     double beat() const;
     void action(Action action);

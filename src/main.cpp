@@ -26,15 +26,16 @@ int main(int argc,char** argv) {
     auto app=std::make_unique<Application>(library.entries[matches[selected]].song,display);app->draw(true);
     if(!snapshot.empty()){display.tick(10);savePBM(display.committed,snapshot);return 0;}
     if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER)!=0){std::cerr<<SDL_GetError()<<'\n';return 1;}
-    SDL_Window* window=SDL_CreateWindow("BeatTab | X4 Pro performance lab",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,1120,700,0);
+    SDL_Window* window=SDL_CreateWindow("BeatTab | X4 Pro performance lab",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,600,750,SDL_WINDOW_RESIZABLE);
     SDL_Renderer* renderer=window?SDL_CreateRenderer(window,-1,SDL_RENDERER_SOFTWARE):nullptr;
-    SDL_Texture* texture=renderer?SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,1120,700):nullptr;
+    SDL_Texture* texture=renderer?SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,800,1000):nullptr;
     if(!texture){std::cerr<<SDL_GetError()<<'\n';SDL_Quit();return 1;}
-    std::vector<uint32_t> pixels(1120*700);bool running=true;uint64_t last=SDL_GetPerformanceCounter();
+    SDL_RenderSetLogicalSize(renderer,800,1000);
+    std::vector<uint32_t> pixels(800*1000);bool running=true;uint64_t last=SDL_GetPerformanceCounter();
     std::string notice=library.errors.empty()?"ORIGINAL EXAMPLES + SYNTHETIC FIXTURES":"LIBRARY HAS ERRORS - SEE TERMINAL";
     auto changeSong=[&](int delta){selected=(selected+matches.size()+delta)%matches.size();app=std::make_unique<Application>(library.entries[matches[selected]].song,display);app->draw(true);};
     auto reload=[&](){std::string id=app?library.entries[matches[selected]].song.id:"";
-        int perRow=app?app->perRow:3;Lyrics lyrics=app?app->lyrics:Lyrics::Timeline;
+        int perRow=app?app->perRow:2;Lyrics lyrics=app?app->lyrics:Lyrics::Timeline;
         app.reset();library.scan(root);matches=library.search(query);selected=0;
         for(auto& d:library.errors)std::cerr<<d.str()<<'\n';
         if(matches.empty()){notice="NO VALID SONGS - FIX FILES AND PRESS F5";return;}
@@ -62,11 +63,11 @@ int main(int argc,char** argv) {
             }
             if(e.type==SDL_MOUSEBUTTONUP && app) {
                 int x=e.button.x,y=e.button.y;
-                if(Rect{50,100,800,480}.contains(x,y))app->touch(x-50,y-100);
-                else if(Rect{860,250,22,65}.contains(x,y))app->action(Action::Next);
-                else if(Rect{860,345,22,65}.contains(x,y))app->action(Action::Previous);
-                else if(Rect{740,64,60,18}.contains(x,y))app->action(Action::Power);
-                else if(x>=920 && x<1100) {
+                if(Rect{50,100,480,800}.contains(x,y))app->touch(x-50,y-100);
+                else if(Rect{540,350,22,65}.contains(x,y))app->action(Action::Next);
+                else if(Rect{540,445,22,65}.contains(x,y))app->action(Action::Previous);
+                else if(Rect{420,64,60,18}.contains(x,y))app->action(Action::Power);
+                else if(x>=600 && x<780) {
                     if(y>=126 && y<158)app->action(Action::Toggle);
                     else if(y>=174 && y<206)app->action(Action::Restart);
                     else if(y>=222 && y<254){app->perRow=app->perRow==4?2:app->perRow+1;app->draw(true);}
@@ -80,27 +81,27 @@ int main(int argc,char** argv) {
             }
         }
         if(app)app->tick(dt);display.tick(dt);
-        Canvas shell(1120,700);
-        shell.text(30,22,"BEATTAB",4,true);shell.text(270,32,"MUSICAL TIME / PERFORMANCE LAB",2,true);
-        shell.box({28,78,844,534},true,5);shell.box({860,250,22,65},true,3);shell.box({860,345,22,65},true,3);shell.box({740,64,60,18},true,3);
-        shell.text(330,594,"XTEINK X4 PRO",1,true);shell.text(40,640,notice,1,true);
-        shell.text(40,668,"UP/DOWN: BAR   LEFT/RIGHT: SECTION   SPACE: PLAY   +/-: TEMPO   F5: RELOAD   N/B: SONG",1,true);
-        shell.text(920,91,"DEVICE LAB",2,true);
-        auto button=[&](int y,std::string label){shell.box({920,y,180,32},true);shell.text(932,y+10,label,1,true,160);};
+        Canvas shell(800,1000);
+        shell.text(30,22,"BEATTAB",4,true);shell.text(270,32,"MUSICAL TIME / PERFORMANCE LAB",1,true);
+        shell.box({28,78,524,854},true,5);shell.box({540,350,22,65},true,3);shell.box({540,445,22,65},true,3);shell.box({420,64,60,18},true,3);
+        shell.text(170,914,"XTEINK X4 PRO",1,true);shell.text(40,950,notice,1,true);
+        shell.text(40,978,"UP/DOWN: BAR   LEFT/RIGHT: SECTION   SPACE: PLAY   +/-: TEMPO   F5: RELOAD   N/B: SONG",1,true);
+        shell.text(600,91,"DEVICE LAB",2,true);
+        auto button=[&](int y,std::string label){shell.box({600,y,180,32},true);shell.text(612,y+10,label,1,true,160);};
         button(126,app&&app->playing?"SPACE / PAUSE":"SPACE / PLAY");button(174,"R / RESTART");
-        button(222,"2/3/4 / BARS: "+std::to_string(app?app->perRow:3));
+        button(222,"2/3/4 / BARS: "+std::to_string(app?app->perRow:2));
         button(270,"L / LYRICS: "+std::string(!app||app->lyrics==Lyrics::Below?"BELOW":app->lyrics==Lyrics::Inside?"INSIDE":"TIMELINE"));
         button(318,"F / FULL REFRESH");button(366,"U / PARTIAL REFRESH");
         button(414,"G / GHOST: "+std::to_string(int(display.ghost*100))+"%");button(462,"[ ] / LIGHT: "+std::to_string(display.light));
-        button(510,"N / NEXT SONG");shell.text(920,562,"FULL "+std::to_string(display.fullCount)+" / PART "+std::to_string(display.partialCount),1,true);
-        shell.text(920,584,display.busy()?"PANEL BUSY":"PANEL READY",1,true);
-        if(app)shell.text(920,606,"BEAT "+std::to_string(app->beat()).substr(0,4),1,true);
-        for(int y=0;y<700;++y)for(int x=0;x<1120;++x) {
+        button(510,"N / NEXT SONG");shell.text(600,562,"FULL "+std::to_string(display.fullCount)+" / PART "+std::to_string(display.partialCount),1,true);
+        shell.text(600,584,display.busy()?"PANEL BUSY":"PANEL READY",1,true);
+        if(app)shell.text(600,606,"BEAT "+std::to_string(app->beat()).substr(0,4),1,true);
+        for(int y=0;y<1000;++y)for(int x=0;x<800;++x) {
             int v=shell.pixel(x,y)?35:235;
-            if(Rect{50,100,800,480}.contains(x,y)){v=display.flashing()?35:display.optical[(y-100)*800+x-50];v=int(v*(.70+.003*display.light));}
-            pixels[y*1120+x]=0xff000000u|uint32_t(v<<16|v<<8|v);
+            if(Rect{50,100,480,800}.contains(x,y)){v=display.flashing()?35:display.optical[(y-100)*480+x-50];v=int(v*(.70+.003*display.light));}
+            pixels[y*800+x]=0xff000000u|uint32_t(v<<16|v<<8|v);
         }
-        SDL_UpdateTexture(texture,nullptr,pixels.data(),1120*4);SDL_RenderClear(renderer);SDL_RenderCopy(renderer,texture,nullptr,nullptr);SDL_RenderPresent(renderer);SDL_Delay(16);
+        SDL_UpdateTexture(texture,nullptr,pixels.data(),800*4);SDL_RenderClear(renderer);SDL_RenderCopy(renderer,texture,nullptr,nullptr);SDL_RenderPresent(renderer);SDL_Delay(16);
     }
     SDL_DestroyTexture(texture);SDL_DestroyRenderer(renderer);SDL_DestroyWindow(window);SDL_Quit();return 0;
 }

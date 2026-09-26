@@ -14,7 +14,7 @@ public:
     int fullCount=0,partialCount=0;
     double ghost=.18,fullSeconds=.8,partialSeconds=.16;
     int light=65;
-    EInk():optical(800*480,255){}
+    explicit EInk(int width=480,int height=800):committed(width,height),optical(width*height,255){}
     void request(const Canvas& c,Refresh mode) override;
     void tick(double dt);
     bool busy() const {return target_.has_value();}

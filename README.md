@@ -4,7 +4,7 @@ A guitar-mounted performance reader built around **section → bar → beat**.
 Lyrics annotate musical time; whitespace never encodes timing.
 
 Milestone 1 is ready for notation and UI evaluation. It includes a dependency-free
-C++17 core, file-backed library, and native SDL2 simulator with an **800 × 480**
+C++17 core, file-backed library, and native SDL2 simulator with an **480 × 800 portrait**
 landscape, 1-bit framebuffer for the Xteink X4 Pro. **No firmware is built or flashed.**
 
 ## Run
@@ -132,3 +132,7 @@ Lyric placement defaults to **Timeline**, which aligns phrases to their beat
 positions (for example, `lyric 1.5 "Enter here"`). Press **L** to compare
 left-aligned Below/Inside layouts; those modes do not show timing offsets.
 **F5** reloads the song while retaining the selected lyric layout and bars per row.
+
+The simulator opens in portrait with **two bars per row** (four rows / eight
+bars per page). Its resizable desktop window scales the panel and touch targets
+together; F5 keeps the selected bar count.

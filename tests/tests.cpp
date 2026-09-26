@@ -66,7 +66,7 @@ int main() {
         invalid(std::string("capo ")+value+"\nsection \"A\"\nbar\n");
     invalid("capo 2\ncapo 3\nsection \"A\"\nbar\n");
     invalid("section \"A\"\nbar\ncapo 2\n");
-    auto& s=good.song;RecordingDisplay d;Application a(s,d);a.draw();CHECK(d.full==1);a.action(Action::Toggle);a.tick(1.99);CHECK(a.current==0);a.tick(.01);CHECK(a.current==1);a.tick(.5);CHECK(a.current==2);CHECK(a.elapsed<1e-8);
+    auto& s=good.song;RecordingDisplay d;Application a(s,d,800,480);a.draw();CHECK(d.full==1);a.action(Action::Toggle);a.tick(1.99);CHECK(a.current==0);a.tick(.01);CHECK(a.current==1);a.tick(.5);CHECK(a.current==2);CHECK(a.elapsed<1e-8);
     a.action(Action::Toggle);a.tick(100);CHECK(a.current==2);a.action(Action::PreviousSection);CHECK(a.current==0);a.action(Action::NextSection);CHECK(a.current==2);
     a.action(Action::Restart);CHECK(a.current==0);a.action(Action::Faster);a.action(Action::Toggle);a.tick(2/a.rate);CHECK(a.current==1);
     a.tick(100);CHECK(!a.playing);CHECK(a.current==3);a.action(Action::Toggle);CHECK(a.current==0);CHECK(a.playing);
@@ -92,11 +92,26 @@ int main() {
     }
     CHECK(seconds(capoSong.sections[0].bars[0])==seconds(s.sections[0].bars[0]));
     a.touch(400,460);CHECK(a.playing);a.touch(550,460);CHECK(a.current==1);
-    RecordingDisplay pages;Application paged(lib.entries[lib.search("Amber")[0]].song,pages);paged.perRow=2;paged.draw();paged.seek(4);CHECK(pages.full==2);paged.seek(5);CHECK(pages.partial==1);
-    EInk ink;Canvas black;black.fill({0,0,800,480},true);ink.request(black,Refresh::Full);CHECK(ink.busy());ink.tick(.4);CHECK(ink.fullCount==0);ink.tick(.4);CHECK(ink.fullCount==1);CHECK(ink.optical[0]==0);
+    RecordingDisplay pages;Application paged(lib.entries[lib.search("Amber")[0]].song,pages,800,480);paged.perRow=2;paged.draw();paged.seek(4);CHECK(pages.full==2);paged.seek(5);CHECK(pages.partial==1);
+    EInk ink(800,480);Canvas black;black.fill({0,0,800,480},true);ink.request(black,Refresh::Full);CHECK(ink.busy());ink.tick(.4);CHECK(ink.fullCount==0);ink.tick(.4);CHECK(ink.fullCount==1);CHECK(ink.optical[0]==0);
     Canvas white;ink.request(white,Refresh::Partial);ink.tick(.16);CHECK(ink.partialCount==1);CHECK(ink.optical[0]>0 && ink.optical[0]<255);
     ink.request(white,Refresh::Full);ink.tick(.8);CHECK(ink.optical[0]==255);
     ink.request(black,Refresh::Partial);ink.request(black,Refresh::Full);ink.request(white,Refresh::Partial);ink.tick(10);CHECK(ink.fullCount==3);CHECK(ink.committed.hash()==white.hash());
+    // Portrait defaults, four rows of two bars, and matching touch/optical coordinates.
+    RecordingDisplay portraitDisplay;Application portrait(lib.entries[lib.search("Amber")[0]].song,portraitDisplay);
+    CHECK(portrait.width==480 && portrait.height==800 && portrait.perRow==2);
+    portrait.draw();CHECK(portraitDisplay.last.width==480 && portraitDisplay.last.height==800);
+    auto portraitGrid=layout(19,0,480,800,2);CHECK(portraitGrid.cells.size()==8);CHECK(portraitGrid.pages==3);
+    portrait.touch(250,570);CHECK(portrait.current==7);
+    portrait.touch(320,775);CHECK(portrait.current==8);CHECK(portraitDisplay.full==2);
+    portrait.touch(35,775);CHECK(portrait.current==7);
+    portrait.touch(130,775);CHECK(portrait.current==0);
+    portrait.touch(240,775);CHECK(portrait.playing);
+    portrait.action(Action::Power);CHECK(portraitDisplay.last.width==480 && portraitDisplay.last.height==800);
+    EInk portraitInk;Canvas portraitBlack(480,800);portraitBlack.pixel(479,799,true);
+    portraitInk.request(portraitBlack,Refresh::Full);portraitInk.tick(1);
+    CHECK(portraitInk.committed.pixel(479,799));CHECK(portraitInk.optical.back()==0);
+    portraitInk.request(Canvas(800,480),Refresh::Full);CHECK(!portraitInk.busy());
     // Source line reporting, comments, escape handling, ASCII syntax strictness.
     auto bad=parse(header+"section \"A\"\nbar\nlyric 0 \"oops\"\n","line.song");CHECK(bad.errors.front().line==10);
     auto escaped=parse(header+"# comment\nsection \"A\"\nbar # normal\nlyric 1 \"Say \\\"hi\\\"\" # annotation\n");CHECK(escaped);CHECK(parse(serialize(escaped.song)));
