@@ -1,0 +1,16 @@
+beattab 1
+id "07-pickup"
+title "07 Pickup"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Pickup"
+bar length=1
+chord 1 "E7"
+lyric 1 "And"
+section "Verse"
+bar
+chord 1 "Am"
+lyric 1 "Here we begin"

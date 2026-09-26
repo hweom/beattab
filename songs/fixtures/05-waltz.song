@@ -1,0 +1,28 @@
+beattab 1
+id "05-waltz"
+title "05 Waltz"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 3/4
+
+section "Waltz"
+bar
+chord 1 "Dm"
+chord 3 "A7"
+bar
+chord 1 "Dm"
+chord 3 "A7"
+bar
+chord 1 "Dm"
+chord 3 "A7"
+bar
+chord 1 "Dm"
+chord 3 "A7"
+bar
+chord 1 "Dm"
+chord 3 "A7"
+bar
+chord 1 "Dm"
+chord 3 "A7"
+

@@ -1,0 +1,37 @@
+beattab 1
+id "harbor-waltz"
+title "Harbor Waltz"
+artist "BeatTab originals"
+key "Am"
+tempo 108
+time 3/4
+
+section "A"
+bar
+chord 1 "Dm"
+bar
+chord 1 "A7"
+bar
+chord 1 "Dm"
+bar
+chord 1 "Gm"
+bar
+chord 1 "C"
+bar
+chord 1 "F"
+bar
+chord 1 "A7"
+bar
+chord 1 "Dm"
+section "B"
+bar
+chord 1 "Gm"
+chord 3 "C"
+bar
+chord 1 "F"
+bar
+chord 1 "A7"
+bar
+chord 1 "Dm"
+play "A" 2
+play "B" 2

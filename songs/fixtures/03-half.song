@@ -1,0 +1,22 @@
+beattab 1
+id "03-half"
+title "03 Two chords per bar"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Half bars"
+bar
+chord 1 "C"
+chord 3 "G"
+bar
+chord 1 "C"
+chord 3 "G"
+bar
+chord 1 "C"
+chord 3 "G"
+bar
+chord 1 "C"
+chord 3 "G"
+

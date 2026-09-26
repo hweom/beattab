@@ -1,0 +1,13 @@
+name: Tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
+      - run: make -j2 all
+      - run: make test golden validate sanitize
+      - run: SDL_VIDEODRIVER=dummy ./build/beattab --snapshot build/ci.pbm

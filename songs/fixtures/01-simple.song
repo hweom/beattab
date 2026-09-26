@@ -1,0 +1,22 @@
+beattab 1
+id "01-simple"
+title "01 Simple four four"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Verse"
+bar
+chord 1 "Am"
+lyric 1 "Count the beat"
+bar
+chord 1 "C"
+lyric 1 "Hear the change"
+bar
+chord 1 "D"
+lyric 1 "Hold the shape"
+bar
+chord 1 "F"
+lyric 1 "Start again"
+

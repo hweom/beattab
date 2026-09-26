@@ -1,0 +1,36 @@
+beattab 1
+id "amber-road"
+title "Amber Road"
+artist "BeatTab originals"
+key "Am"
+tempo 96
+time 4/4
+
+section "Verse"
+bar
+chord 1 "Am"
+lyric 1 "Boots by the door"
+bar
+chord 1 "C"
+lyric 1 "Rain on the stone"
+bar
+chord 1 "F"
+lyric 1 "Count out the miles"
+bar
+chord 1 "G"
+lyric 1 "Find our way home"
+section "Chorus"
+bar
+chord 1 "F"
+lyric 1 "Walk the amber road"
+bar
+chord 1 "C"
+lyric 1 "Let the evening fall"
+bar
+chord 1 "G"
+lyric 1 "Keep a little rhythm"
+bar
+chord 1 "Am"
+lyric 1 "That is all"
+play "Verse" 2
+play "Chorus" 2

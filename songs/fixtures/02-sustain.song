@@ -1,0 +1,26 @@
+beattab 1
+id "02-sustain"
+title "02 Repeated chord"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Hold"
+bar
+chord 1 "D"
+bar
+chord 1 "D"
+bar
+chord 1 "D"
+bar
+chord 1 "D"
+bar
+chord 1 "D"
+bar
+chord 1 "D"
+bar
+chord 1 "D"
+bar
+chord 1 "D"
+

@@ -1,0 +1,16 @@
+beattab 1
+id "04-fractions"
+title "04 Unusual beats"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Offbeat"
+bar
+chord 1 "Am"
+chord 5/2 "G"
+chord 13/4 "F"
+bar
+chord 4/3 "Dm"
+chord 11/3 "E7"

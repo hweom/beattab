@@ -1,0 +1,26 @@
+beattab 1
+id "08-instrumental"
+title "08 Instrumental"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Instrumental"
+bar
+chord 1 "Am"
+bar
+chord 1 "Am"
+bar
+chord 1 "F"
+bar
+chord 1 "G"
+bar
+chord 1 "C"
+bar
+chord 1 "G"
+bar
+chord 1 "Am"
+bar
+chord 1 "Am"
+

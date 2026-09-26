@@ -1,0 +1,38 @@
+beattab 1
+id "11-mixed"
+title "11 Chords and tab"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Mixed"
+bar
+chord 1 "Am"
+chord 3 "G"
+tab 1 5 0 1
+tab 2 4 2 1
+tab 3 6 3 1
+tab 4 3 0 1
+bar
+chord 1 "Am"
+chord 3 "G"
+tab 1 5 0 1
+tab 2 4 2 1
+tab 3 6 3 1
+tab 4 3 0 1
+bar
+chord 1 "Am"
+chord 3 "G"
+tab 1 5 0 1
+tab 2 4 2 1
+tab 3 6 3 1
+tab 4 3 0 1
+bar
+chord 1 "Am"
+chord 3 "G"
+tab 1 5 0 1
+tab 2 4 2 1
+tab 3 6 3 1
+tab 4 3 0 1
+

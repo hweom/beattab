@@ -1,0 +1,41 @@
+beattab 1
+id "copper-wire"
+title "Copper Wire"
+artist "BeatTab originals"
+key "Am"
+tempo 112
+time 4/4
+
+section "Riff"
+bar
+chord 1 "Em"
+tab 1 6 0 1
+tab 2 5 2 1
+tab 3 4 2 1
+tab 4 3 0 1
+bar
+chord 1 "Em"
+tab 1 6 0 1
+tab 2 5 2 1
+tab 3 4 2 1
+tab 4 3 0 1
+bar
+chord 1 "Em"
+tab 1 6 0 1
+tab 2 5 2 1
+tab 3 4 2 1
+tab 4 3 0 1
+bar
+chord 1 "Em"
+tab 1 6 0 1
+tab 2 5 2 1
+tab 3 4 2 1
+tab 4 3 0 1
+section "Lift"
+bar
+chord 1 "C"
+chord 3 "D"
+bar
+chord 1 "Em"
+play "Riff" 2
+play "Lift" 2

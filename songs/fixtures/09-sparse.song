@@ -1,0 +1,19 @@
+beattab 1
+id "09-sparse"
+title "09 Sparse lyric anchors"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Verse"
+bar
+chord 1 "Am"
+lyric 1 "Leave some room for silence"
+bar
+chord 1 "C"
+bar
+chord 1 "F"
+lyric 3 "Breathe again"
+bar
+chord 1 "E"

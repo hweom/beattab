@@ -1,0 +1,18 @@
+beattab 1
+id "13-changes"
+title "13 Tempo and meter changes"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Changes"
+bar
+chord 1 "C"
+bar time=3/4 tempo=90
+chord 1 "F"
+bar
+chord 1 "G"
+bar time=6/8 tempo=120
+chord 1 "Am"
+chord 4 "E"

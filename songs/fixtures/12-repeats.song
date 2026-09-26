@@ -1,0 +1,22 @@
+beattab 1
+id "12-repeats"
+title "12 Repeated verse chorus"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 4/4
+
+section "Verse"
+bar
+chord 1 "Am"
+bar
+chord 1 "G"
+section "Chorus"
+bar
+chord 1 "F"
+bar
+chord 1 "C"
+play "Verse" 2
+play "Chorus" 1
+play "Verse" 1
+play "Chorus" 2

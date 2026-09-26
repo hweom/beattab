@@ -1,0 +1,4 @@
+/build/
+/state/
+.DS_Store
+*.dSYM/

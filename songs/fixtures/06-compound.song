@@ -1,0 +1,28 @@
+beattab 1
+id "06-compound"
+title "06 Compound meter"
+artist "BeatTab fixtures"
+key "Am"
+tempo 120
+time 6/8
+
+section "Six eight"
+bar
+chord 1 "Am"
+chord 4 "G"
+bar
+chord 1 "Am"
+chord 4 "G"
+bar
+chord 1 "Am"
+chord 4 "G"
+bar
+chord 1 "Am"
+chord 4 "G"
+bar
+chord 1 "Am"
+chord 4 "G"
+bar
+chord 1 "Am"
+chord 4 "G"
+
