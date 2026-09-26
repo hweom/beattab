@@ -127,3 +127,8 @@ but this first cheat-sheet renderer prints fret onsets, not full rhythmic notati
 [Architecture and decisions](docs/ARCHITECTURE.md) ·
 [Hardware research and unresolved questions](docs/HARDWARE.md) ·
 [Evaluation checklist](docs/EVALUATION.md)
+
+Lyric placement defaults to **Timeline**, which aligns phrases to their beat
+positions (for example, `lyric 1.5 "Enter here"`). Press **L** to compare
+left-aligned Below/Inside layouts; those modes do not show timing offsets.
+**F5** reloads the song while retaining the selected lyric layout and bars per row.

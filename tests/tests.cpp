@@ -25,6 +25,34 @@ int main() {
     invalid("section \"A\"\nbar\nplay \"missing\" 1\n");invalid("section \"A\"\nbar\nplay \"A\" 0\n");
     invalid("section \"A\"\nbar\nsection \"A\"\nbar\n");invalid("section \"Empty\"\n");invalid("bar\n");
     invalid("section \"A\"\nbar\nchord 99999999999999999999 \"C\"\n");
+    // Decimal input is exact and interoperates with fractional positions.
+    auto decimal=parse(header+"section \"A\"\nbar length=3.5\nlyric 1.5 \"Enter here\"\nchord 2.25 \"G\"\ntab 3.125 1 0 0.375\n");
+    CHECK(decimal);auto& db=decimal.song.sections[0].bars[0];
+    CHECK(db.length==Rational(7,2));CHECK(db.events[0].offset==Rational(1,2));
+    CHECK(db.events[1].offset==Rational(5,4));CHECK(db.events[2].duration==Rational(3,8));
+    CHECK(parse(serialize(decimal.song)));CHECK(serialize(parse(serialize(decimal.song)).song)==serialize(decimal.song));
+    for(auto pos:{"1.0","1.500","1.001","4.999"}) CHECK(parse(header+"section \"A\"\nbar\nlyric "+pos+" \"Enter\"\n"));
+    for(auto pos:{".5","1.","1.2.3","1.5/2","1e0","-1.5","+1.5","0.5","5.0","1.0001","999999999999999999.5"})
+        invalid(std::string("section \"A\"\nbar\nlyric ")+pos+" \"Enter\"\n");
+    invalid("section \"A\"\nbar\nlyric 1.5 \"One\"\nlyric 3/2 \"Duplicate\"\n");
+    invalid("section \"A\"\nbar length=0.5\nlyric 1.5 \"Outside\"\n");
+    invalid("section \"A\"\nbar\ntab 4.5 1 0 0.501\n");
+    // In the default layout, a half-beat delay shifts the visible lyric by 1/8 bar.
+    auto onset=parse(header+"section \"A\"\nbar\nlyric 1 \"Enter\"\n");CHECK(onset);
+    RecordingDisplay lyricDisplay;Application lyricApp(onset.song,lyricDisplay);
+    CHECK(lyricApp.lyrics==Lyrics::Timeline);
+    for(int columns=2;columns<=4;++columns) {
+        auto refs=expand(onset.song);auto grid=layout(1,0,800,480,columns);
+        auto early=render(onset.song,refs,grid,0,false,lyricApp.lyrics,1);
+        auto lateSong=onset.song;lateSong.sections[0].bars[0].events[0].offset=Rational(1,2);
+        auto late=render(lateSong,refs,grid,0,false,lyricApp.lyrics,1);
+        auto rect=grid.cells[0].bounds;int dx=(rect.w-18)/8;bool ink=false;
+        for(int y=rect.y+86;y<rect.y+100;++y)for(int x=rect.x+9;x<rect.x+69;++x) {
+            CHECK(early.pixel(x,y)==late.pixel(x+dx,y));ink=ink||early.pixel(x,y);
+        }
+        CHECK(ink);CHECK(early.hash()!=late.hash());
+        for(int y=rect.y+86;y<rect.y+100;++y)for(int x=rect.x+9;x<rect.x+9+dx;++x) CHECK(!late.pixel(x,y));
+    }
     auto changes=parse(header+"section \"A\"\nbar\nbar time=3/4 tempo=90\nbar\nbar time=6/8 tempo=120\nsection \"B\"\nbar\n");CHECK(changes);
     auto& bars=changes.song.sections[0].bars;CHECK(seconds(bars[0])==2);CHECK(seconds(bars[1])==2);CHECK(seconds(bars[2])==2);CHECK(seconds(bars[3])==1.5);CHECK(quarterLength(bars[3])==Rational(3));CHECK(changes.song.sections[1].bars[0].bpm==120);
     CHECK(!good.song.capo);

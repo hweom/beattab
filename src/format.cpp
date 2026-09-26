@@ -11,9 +11,21 @@ bool integer(const std::string& s, int& n, int lo, int hi) {
     return r.ec == std::errc{} && r.ptr == s.data()+s.size() && n>=lo && n<=hi;
 }
 bool fraction(const std::string& s, Rational& r) {
+    auto dot=s.find('.');
+    if(dot!=std::string::npos) {
+        // Parse fixed-point input exactly, without floating-point rounding.
+        auto digits=s.size()-dot-1; int whole=0,part=0,scale=1;
+        if(digits<1 || digits>3 || !integer(s.substr(0,dot),whole,0,1024) ||
+           !integer(s.substr(dot+1),part,0,999)) return false;
+        for(size_t i=0;i<digits;++i) scale*=10;
+        if(whole==1024 && part!=0) return false;
+        r={whole*scale+part,scale}; return true;
+    }
     auto p=s.find('/'); int n=0,d=1;
-    if (!integer(s.substr(0,p),n,0,1024)) return false;
-    if (p!=std::string::npos && !integer(s.substr(p+1),d,1,64)) return false;
+    // Include exact canonical fractions produced by decimal input.
+    if (!integer(s.substr(0,p),n,0,1024000)) return false;
+    if (p!=std::string::npos && !integer(s.substr(p+1),d,1,1000)) return false;
+    if(n>1024*d) return false;
     r={n,d}; return true;
 }
 bool meter(const std::string& s, Meter& m) {
@@ -80,7 +92,7 @@ ParseResult parse(const std::string& text, const std::string& source) {
             auto& b=s.sections.back().bars.back(); Event e; std::string pos;
             e.kind=op=="chord"?Kind::Chord:op=="lyric"?Kind::Lyric:op=="tab"?Kind::Tab:Kind::Note;
             in>>pos; Rational beat;
-            if(!fraction(pos,beat) || beat<Rational(1)) {error("beat must be a positive integer or fraction, starting at 1");continue;}
+            if(!fraction(pos,beat) || beat<Rational(1)) {error("beat must be an integer, decimal (up to 3 places), or fraction, starting at 1");continue;}
             e.offset=beat-Rational(1);
             if(!(e.offset<b.length)) {error("event starts outside bar");continue;}
             if(e.kind==Kind::Tab) {

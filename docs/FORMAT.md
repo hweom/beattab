@@ -62,14 +62,17 @@ resolved time, tempo and length on every bar to make playback context explicit.
 ## Events
 
 Event positions are rational **1-based** beats within the bar; the internal
-model stores rational zero-based offsets. Accepted numeric syntax is `N` or
-`N/D` (no decimals, no negatives). Input numerator ≤1024, denominator 1–64.
-The fraction is normalized, so `6/4` and `3/2` are identical positions.
+model stores rational zero-based offsets. Accepted numeric syntax is `N`, `N/D`, or a decimal such as `1.5` (up to
+three decimal places; no signs or exponents). Values are at most 1024; fraction
+numerators are at most 1024000 and denominators 1–1000. Decimals are converted
+exactly to reduced fractions: `1.5`, `6/4`, and `3/2` are identical positions.
+These forms also work for bar lengths and tab durations. Serialization uses
+reduced fractions. Beat `1.5` is halfway between beats 1 and 2.
 
 ```
 chord 1 "Am"
 chord 5/2 "G7"
-lyric 1 "Approximately anchored phrase"
+lyric 1.5 "Approximately anchored phrase"
 note 3 "Let ring"
 tab 1 6 0 1/2
 tab 3/2 5 2 1

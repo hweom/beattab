@@ -33,11 +33,13 @@ int main(int argc,char** argv) {
     std::vector<uint32_t> pixels(1120*700);bool running=true;uint64_t last=SDL_GetPerformanceCounter();
     std::string notice=library.errors.empty()?"ORIGINAL EXAMPLES + SYNTHETIC FIXTURES":"LIBRARY HAS ERRORS - SEE TERMINAL";
     auto changeSong=[&](int delta){selected=(selected+matches.size()+delta)%matches.size();app=std::make_unique<Application>(library.entries[matches[selected]].song,display);app->draw(true);};
-    auto reload=[&](){std::string id=library.entries[matches[selected]].song.id;app.reset();library.scan(root);matches=library.search(query);selected=0;
+    auto reload=[&](){std::string id=app?library.entries[matches[selected]].song.id:"";
+        int perRow=app?app->perRow:3;Lyrics lyrics=app?app->lyrics:Lyrics::Timeline;
+        app.reset();library.scan(root);matches=library.search(query);selected=0;
         for(auto& d:library.errors)std::cerr<<d.str()<<'\n';
-        if(matches.empty()){notice="NO VALID SONGS - FIX FILES AND RESTART";return;}
+        if(matches.empty()){notice="NO VALID SONGS - FIX FILES AND PRESS F5";return;}
         for(size_t i=0;i<matches.size();++i)if(library.entries[matches[i]].song.id==id)selected=i;
-        app=std::make_unique<Application>(library.entries[matches[selected]].song,display);app->draw(true);notice=library.errors.empty()?"LIBRARY RELOADED":"VALIDATION ERRORS - SEE TERMINAL";};
+        app=std::make_unique<Application>(library.entries[matches[selected]].song,display);app->perRow=perRow;app->lyrics=lyrics;app->draw(true);notice=library.errors.empty()?"LIBRARY RELOADED":"VALIDATION ERRORS - SEE TERMINAL";};
     while(running) {
         uint64_t now=SDL_GetPerformanceCounter();double dt=double(now-last)/SDL_GetPerformanceFrequency();last=now;
         SDL_Event e;while(SDL_PollEvent(&e)) {

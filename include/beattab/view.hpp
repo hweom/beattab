@@ -39,7 +39,7 @@ public:
     double elapsed=0,rate=1;
     bool playing=false,sleeping=false;
     int perRow=3;
-    Lyrics lyrics=Lyrics::Below;
+    Lyrics lyrics=Lyrics::Timeline;
     explicit Application(const Song& song,Display& display);
     const Bar& bar() const;
     double beat() const;
