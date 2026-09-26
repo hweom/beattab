@@ -26,13 +26,20 @@ int main(int argc,char** argv) {
     auto app=std::make_unique<Application>(library.entries[matches[selected]].song,display);app->draw(true);
     if(!snapshot.empty()){display.tick(10);savePBM(display.committed,snapshot);return 0;}
     if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER)!=0){std::cerr<<SDL_GetError()<<'\n';return 1;}
-    SDL_Window* window=SDL_CreateWindow("BeatTab | X4 Pro performance lab",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,600,750,SDL_WINDOW_RESIZABLE);
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,"nearest");
+    bool showLab=false;const int panelWidth=480,panelHeight=800,labWidth=240;
+    SDL_Window* window=SDL_CreateWindow("BeatTab | X4 Pro performance lab",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,panelWidth,panelHeight,SDL_WINDOW_RESIZABLE|SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Renderer* renderer=window?SDL_CreateRenderer(window,-1,SDL_RENDERER_SOFTWARE):nullptr;
-    SDL_Texture* texture=renderer?SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,800,1000):nullptr;
+    SDL_Texture* texture=renderer?SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,panelWidth+labWidth,panelHeight):nullptr;
     if(!texture){std::cerr<<SDL_GetError()<<'\n';SDL_Quit();return 1;}
-    SDL_RenderSetLogicalSize(renderer,800,1000);
-    std::vector<uint32_t> pixels(800*1000);bool running=true;uint64_t last=SDL_GetPerformanceCounter();
-    std::string notice=library.errors.empty()?"ORIGINAL EXAMPLES + SYNTHETIC FIXTURES":"LIBRARY HAS ERRORS - SEE TERMINAL";
+    SDL_SetWindowMinimumSize(window,panelWidth,panelHeight);
+    SDL_RenderSetLogicalSize(renderer,panelWidth,panelHeight);
+    SDL_RenderSetIntegerScale(renderer,SDL_TRUE);
+    int outputWidth=0,outputHeight=0;SDL_GetRendererOutputSize(renderer,&outputWidth,&outputHeight);
+    std::cout<<"Panel: "<<panelWidth<<"x"<<panelHeight<<"; renderer output: "<<outputWidth<<"x"<<outputHeight<<"; integer scaling enabled\n";
+    std::vector<uint32_t> pixels((panelWidth+labWidth)*panelHeight);bool running=true;uint64_t last=SDL_GetPerformanceCounter();
+    SDL_SetWindowTitle(window,"BeatTab - Tab: lab controls | F5: reload");
+    std::string notice=library.errors.empty()?"LIBRARY READY":"LIBRARY ERRORS: SEE TERMINAL";
     auto changeSong=[&](int delta){selected=(selected+matches.size()+delta)%matches.size();app=std::make_unique<Application>(library.entries[matches[selected]].song,display);app->draw(true);};
     auto reload=[&](){std::string id=app?library.entries[matches[selected]].song.id:"";
         int perRow=app?app->perRow:2;Lyrics lyrics=app?app->lyrics:Lyrics::Timeline;
@@ -47,6 +54,11 @@ int main(int argc,char** argv) {
             if(e.type==SDL_QUIT)running=false;
             if(e.type==SDL_KEYDOWN && !e.key.repeat) {
                 auto k=e.key.keysym.sym;if(k==SDLK_ESCAPE)running=false;
+                if(k==SDLK_TAB) {
+                    showLab=!showLab;int w=panelWidth+(showLab?labWidth:0);
+                    SDL_SetWindowMinimumSize(window,w,panelHeight);SDL_SetWindowSize(window,w,panelHeight);
+                    SDL_RenderSetLogicalSize(renderer,w,panelHeight);continue;
+                }
                 if(k==SDLK_F5){reload();continue;}if(!app)continue;
                 if(k==SDLK_SPACE)app->action(Action::Toggle);else if(k==SDLK_r)app->action(Action::Restart);
                 else if(k==SDLK_UP)app->action(Action::Previous);else if(k==SDLK_DOWN)app->action(Action::Next);
@@ -63,11 +75,8 @@ int main(int argc,char** argv) {
             }
             if(e.type==SDL_MOUSEBUTTONUP && app) {
                 int x=e.button.x,y=e.button.y;
-                if(Rect{50,100,480,800}.contains(x,y))app->touch(x-50,y-100);
-                else if(Rect{540,350,22,65}.contains(x,y))app->action(Action::Next);
-                else if(Rect{540,445,22,65}.contains(x,y))app->action(Action::Previous);
-                else if(Rect{420,64,60,18}.contains(x,y))app->action(Action::Power);
-                else if(x>=600 && x<780) {
+                if(Rect{0,0,panelWidth,panelHeight}.contains(x,y))app->touch(x,y);
+                else if(showLab && x>=500 && x<700) {
                     if(y>=126 && y<158)app->action(Action::Toggle);
                     else if(y>=174 && y<206)app->action(Action::Restart);
                     else if(y>=222 && y<254){app->perRow=app->perRow==4?2:app->perRow+1;app->draw(true);}
@@ -81,27 +90,31 @@ int main(int argc,char** argv) {
             }
         }
         if(app)app->tick(dt);display.tick(dt);
-        Canvas shell(800,1000);
-        shell.text(30,22,"BEATTAB",4,true);shell.text(270,32,"MUSICAL TIME / PERFORMANCE LAB",1,true);
-        shell.box({28,78,524,854},true,5);shell.box({540,350,22,65},true,3);shell.box({540,445,22,65},true,3);shell.box({420,64,60,18},true,3);
-        shell.text(170,914,"XTEINK X4 PRO",1,true);shell.text(40,950,notice,1,true);
-        shell.text(40,978,"UP/DOWN: BAR   LEFT/RIGHT: SECTION   SPACE: PLAY   +/-: TEMPO   F5: RELOAD   N/B: SONG",1,true);
-        shell.text(600,91,"DEVICE LAB",2,true);
-        auto button=[&](int y,std::string label){shell.box({600,y,180,32},true);shell.text(612,y+10,label,1,true,160);};
+        int viewWidth=panelWidth+(showLab?labWidth:0);
+        Canvas shell(viewWidth,panelHeight);
+        if(showLab) {
+        shell.text(500,91,"DEVICE LAB",2,true);
+        auto button=[&](int y,std::string label){shell.box({500,y,200,32},true);shell.text(512,y+10,label,1,true,160);};
         button(126,app&&app->playing?"SPACE / PAUSE":"SPACE / PLAY");button(174,"R / RESTART");
         button(222,"2/3/4 / BARS: "+std::to_string(app?app->perRow:2));
         button(270,"L / LYRICS: "+std::string(!app||app->lyrics==Lyrics::Below?"BELOW":app->lyrics==Lyrics::Inside?"INSIDE":"TIMELINE"));
         button(318,"F / FULL REFRESH");button(366,"U / PARTIAL REFRESH");
         button(414,"G / GHOST: "+std::to_string(int(display.ghost*100))+"%");button(462,"[ ] / LIGHT: "+std::to_string(display.light));
-        button(510,"N / NEXT SONG");shell.text(600,562,"FULL "+std::to_string(display.fullCount)+" / PART "+std::to_string(display.partialCount),1,true);
-        shell.text(600,584,display.busy()?"PANEL BUSY":"PANEL READY",1,true);
-        if(app)shell.text(600,606,"BEAT "+std::to_string(app->beat()).substr(0,4),1,true);
-        for(int y=0;y<1000;++y)for(int x=0;x<800;++x) {
-            int v=shell.pixel(x,y)?35:235;
-            if(Rect{50,100,480,800}.contains(x,y)){v=display.flashing()?35:display.optical[(y-100)*480+x-50];v=int(v*(.70+.003*display.light));}
-            pixels[y*800+x]=0xff000000u|uint32_t(v<<16|v<<8|v);
+        button(510,"N / NEXT SONG");shell.text(500,562,"FULL "+std::to_string(display.fullCount)+" / PART "+std::to_string(display.partialCount),1,true);
+        shell.text(500,584,display.busy()?"PANEL BUSY":"PANEL READY",1,true);
+        if(app)shell.text(500,606,"BEAT "+std::to_string(app->beat()).substr(0,4),1,true);
+        shell.text(500,652,notice,1,true,200);
+        shell.text(500,698,"TAB: HIDE LAB",1,true);
+        shell.text(500,722,"F5: RELOAD",1,true);
+        shell.text(500,746,"ARROWS: BAR / SECTION",1,true);
         }
-        SDL_UpdateTexture(texture,nullptr,pixels.data(),800*4);SDL_RenderClear(renderer);SDL_RenderCopy(renderer,texture,nullptr,nullptr);SDL_RenderPresent(renderer);SDL_Delay(16);
+        for(int y=0;y<panelHeight;++y)for(int x=0;x<viewWidth;++x) {
+            int v=shell.pixel(x,y)?35:235;
+            if(x<panelWidth){v=display.flashing()?35:display.optical[y*panelWidth+x];v=int(v*(.70+.003*display.light));}
+            pixels[y*viewWidth+x]=0xff000000u|uint32_t(v<<16|v<<8|v);
+        }
+        SDL_Rect viewport={0,0,viewWidth,panelHeight};
+        SDL_UpdateTexture(texture,&viewport,pixels.data(),viewWidth*4);SDL_RenderClear(renderer);SDL_RenderCopy(renderer,texture,&viewport,nullptr);SDL_RenderPresent(renderer);SDL_Delay(16);
     }
     SDL_DestroyTexture(texture);SDL_DestroyRenderer(renderer);SDL_DestroyWindow(window);SDL_Quit();return 0;
 }

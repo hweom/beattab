@@ -4,8 +4,7 @@ A guitar-mounted performance reader built around **section → bar → beat**.
 Lyrics annotate musical time; whitespace never encodes timing.
 
 Milestone 1 is ready for notation and UI evaluation. It includes a dependency-free
-C++17 core, file-backed library, and native SDL2 simulator with an **480 × 800 portrait**
-landscape, 1-bit framebuffer for the Xteink X4 Pro. **No firmware is built or flashed.**
+C++17 core, file-backed library, and native SDL2 simulator with a **480 × 800 portrait**, 1-bit framebuffer for the Xteink X4 Pro. **No firmware is built or flashed.**
 
 ## Run
 
@@ -33,7 +32,8 @@ make snapshots                         # 36 deterministic PGM renderings in buil
 ./build/beattab --snapshot build/song.pbm
 ```
 
-The simulator is a fixed device lab window. The panel is rendered pixel-for-pixel;
+The simulator opens at the panel's native 480 × 800 size, with Retina support.
+Press **Tab** to show or hide the lab controls beside the panel. The panel is rendered pixel-for-pixel;
 your OS display scaling and physical monitor size are not a real device's DPI.
 Its surrounding shell is schematic, not a dimensionally certified enclosure.
 
@@ -41,6 +41,7 @@ Its surrounding shell is schematic, not a dimensionally certified enclosure.
 
 | Input | Action |
 | --- | --- |
+| Tab | Show / hide the lab sidebar |
 | Up / Down | Physical page keys: previous / next bar |
 | P | Physical power: simulated sleep / wake |
 | Space, or tap PLAY/PAUSE on panel | Play / pause |
@@ -56,9 +57,7 @@ Its surrounding shell is schematic, not a dimensionally certified enclosure.
 | F5 | Rescan manually edited files; report invalid songs in terminal |
 | Escape | Quit |
 
-The two case-side keys and power are clickable. In the chosen landscape
-orientation, the upper side key is Next and the lower key is Previous. Click a
-bar to seek. The footer provides touch-accessible playback/navigation. Other
+Up/Down and P simulate the two case-side keys and power. Click a bar to seek. The footer provides touch-accessible playback/navigation. Other
 keys are explicitly desktop development conveniences, not invented hardware.
 
 ## Song example
@@ -134,5 +133,7 @@ left-aligned Below/Inside layouts; those modes do not show timing offsets.
 **F5** reloads the song while retaining the selected lyric layout and bars per row.
 
 The simulator opens in portrait with **two bars per row** (four rows / eight
-bars per page). Its resizable desktop window scales the panel and touch targets
-together; F5 keeps the selected bar count.
+bars per page). Its desktop window never shrinks below native panel size; the optional lab
+sidebar expands the window without shrinking the panel. Resizing keeps touch targets aligned; F5 keeps the selected bar count.
+
+The panel resolution is confirmed by the [ExplorInk X4 Pro hardware report](https://explorink.com/hardware/xteink-x4-pro/): 800 × 480 native, rotated to 480 × 800 portrait. Desktop resizing uses integer scaling and letterboxing to keep bitmap strokes even.
