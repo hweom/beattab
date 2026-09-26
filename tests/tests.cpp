@@ -27,6 +27,17 @@ int main() {
     invalid("section \"A\"\nbar\nchord 99999999999999999999 \"C\"\n");
     auto changes=parse(header+"section \"A\"\nbar\nbar time=3/4 tempo=90\nbar\nbar time=6/8 tempo=120\nsection \"B\"\nbar\n");CHECK(changes);
     auto& bars=changes.song.sections[0].bars;CHECK(seconds(bars[0])==2);CHECK(seconds(bars[1])==2);CHECK(seconds(bars[2])==2);CHECK(seconds(bars[3])==1.5);CHECK(quarterLength(bars[3])==Rational(3));CHECK(changes.song.sections[1].bars[0].bpm==120);
+    CHECK(!good.song.capo);
+    CHECK(serialize(good.song).find("capo ")==std::string::npos);
+    for(int fret:{0,2,12,24}) {
+        auto capo=parse(header+"capo "+std::to_string(fret)+"\nsection \"A\"\nbar\n");
+        CHECK(capo);CHECK(capo.song.capo && *capo.song.capo==fret);
+        auto roundtrip=parse(serialize(capo.song));CHECK(roundtrip);CHECK(roundtrip.song.capo==capo.song.capo);
+    }
+    for(auto value:{"-1","25","2.5","1/2","two","\"2\"","","2 extra"})
+        invalid(std::string("capo ")+value+"\nsection \"A\"\nbar\n");
+    invalid("capo 2\ncapo 3\nsection \"A\"\nbar\n");
+    invalid("section \"A\"\nbar\ncapo 2\n");
     auto& s=good.song;RecordingDisplay d;Application a(s,d);a.draw();CHECK(d.full==1);a.action(Action::Toggle);a.tick(1.99);CHECK(a.current==0);a.tick(.01);CHECK(a.current==1);a.tick(.5);CHECK(a.current==2);CHECK(a.elapsed<1e-8);
     a.action(Action::Toggle);a.tick(100);CHECK(a.current==2);a.action(Action::PreviousSection);CHECK(a.current==0);a.action(Action::NextSection);CHECK(a.current==2);
     a.action(Action::Restart);CHECK(a.current==0);a.action(Action::Faster);a.action(Action::Toggle);a.tick(2/a.rate);CHECK(a.current==1);
@@ -36,6 +47,22 @@ int main() {
     auto l=layout(4,0,800,480,2);CHECK(l.cells.size()==4);CHECK(layout(4,0,800,100,2).cells.empty());CHECK(layout(4,0,800,480,1).cells.empty());
     auto frame=render(s,a.timeline,l,0,false,Lyrics::Below,1);CHECK(frame.bits.size()==48000);CHECK(frame.pixel(21,85));CHECK(!frame.pixel(401,85));
     CHECK(frame.hash()==render(s,a.timeline,l,0,false,Lyrics::Below,1).hash());CHECK(frame.hash()!=render(s,a.timeline,l,1,false,Lyrics::Below,1).hash());
+    auto capoSong=s;capoSong.capo=2;
+    auto capoFrame=render(capoSong,a.timeline,l,0,false,Lyrics::Below,1);
+    CHECK(capoFrame.pixel(684,22));CHECK(!frame.pixel(684,22));
+    // Metadata must not alter musical content or the area below the header.
+    for(int y=44;y<480;++y)for(int x=0;x<800;++x) {
+        if(frame.pixel(x,y)!=capoFrame.pixel(x,y)){CHECK(false);}
+    }
+    capoSong.capo=0;auto noCapoFrame=render(capoSong,a.timeline,l,0,false,Lyrics::Below,1);
+    CHECK(!noCapoFrame.pixel(684,22));CHECK(noCapoFrame.hash()!=frame.hash());
+    capoSong.capo=24;capoSong.title=std::string(100,'W');
+    auto longTitle=render(capoSong,a.timeline,l,0,true,Lyrics::Below,1);
+    capoSong.title="Short";auto shortTitle=render(capoSong,a.timeline,l,0,true,Lyrics::Below,1);
+    for(int y=0;y<44;++y)for(int x=670;x<800;++x) {
+        if(longTitle.pixel(x,y)!=shortTitle.pixel(x,y)){CHECK(false);}
+    }
+    CHECK(seconds(capoSong.sections[0].bars[0])==seconds(s.sections[0].bars[0]));
     a.touch(400,460);CHECK(a.playing);a.touch(550,460);CHECK(a.current==1);
     RecordingDisplay pages;Application paged(lib.entries[lib.search("Amber")[0]].song,pages);paged.perRow=2;paged.draw();paged.seek(4);CHECK(pages.full==2);paged.seek(5);CHECK(pages.partial==1);
     EInk ink;Canvas black;black.fill({0,0,800,480},true);ink.request(black,Refresh::Full);CHECK(ink.busy());ink.tick(.4);CHECK(ink.fullCount==0);ink.tick(.4);CHECK(ink.fullCount==1);CHECK(ink.optical[0]==0);

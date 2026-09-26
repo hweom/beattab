@@ -27,6 +27,19 @@ Key is a descriptive string, not transposition logic. Tempo: integer 20–400
 quarter notes per minute. Meter numerator: 1–32; denominator: 1,2,4,8,16,32.
 Required strings are nonempty and at most 256 bytes.
 
+## Optional capo
+
+Add `capo 2` anywhere in the metadata header (before the first section). This
+sets a full-width capo at fret 2 and displays a small neck-and-clamp pictogram
+with the fret number in the top-right corner. Valid values are integers 0–24;
+`capo 0` explicitly indicates no capo (unclamped neck and 0). Omit the field to
+show no indicator. Duplicate or misplaced declarations are errors.
+
+This is a playing instruction: chord labels remain the shapes to play, and tab
+frets remain relative to the capo. No automatic transposition is performed;
+`key` remains descriptive metadata. Serialization preserves both an omitted
+setting and an explicit zero. This optional field is part of experimental v1.
+
 ## Sections and bars
 
 `section "Any name"` declares a unique section. `bar` starts the next bar in it.

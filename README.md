@@ -71,6 +71,7 @@ artist "Me"
 key "Am"
 tempo 120
 time 4/4
+capo 2
 
 section "Verse"
 bar
@@ -89,6 +90,11 @@ Beat positions are **1-based**; `5/2` means beat 2½. Tempo is always **quarter
 notes per minute**, so a 6/8 bar at 120 lasts 1.5 seconds. Tab events use the same
 positions: `tab BEAT STRING FRET DURATION`; string 1 is high E. See
 [the full format specification](docs/FORMAT.md).
+
+Add optional `capo 2` to a song's header for a top-right capo pictogram and fret
+number. Omit it to hide the indicator; `capo 0` explicitly means no capo. Values
+0–24 are supported. Chord shapes and tab frets are not transposed automatically.
+Amber Road demonstrates capo 2.
 
 ## What's included
 

@@ -39,10 +39,15 @@ ParseResult parse(const std::string& text, const std::string& source) {
         ++line; std::istringstream in(raw); std::string op; in >> op;
         if (op.empty() || op[0]=='#') continue;
         if (!version) { std::string v; in>>v; if(op!="beattab" || v!="1" || !end(in)) {error("expected beattab 1 header"); return r;} version=true; continue; }
-        if (op=="id" || op=="title" || op=="artist" || op=="key" || op=="tempo" || op=="time") {
+        if (op=="id" || op=="title" || op=="artist" || op=="key" || op=="tempo" || op=="time" || op=="capo") {
             if (!s.sections.empty() || !metadata.insert(op).second) {error("metadata must be unique and precede sections"); continue;}
             std::string v;
             if (op=="tempo" || op=="time") { in>>v; if(op=="tempo" ? !integer(v,s.bpm,20,400) : !meter(v,s.meter)) error("invalid " + op); }
+            else if (op=="capo") {
+                in>>v; int fret=0;
+                if(!integer(v,fret,0,24)) error("capo must be an integer fret from 0 to 24");
+                else s.capo=fret;
+            }
             else if (!quoted(in,v) || v.empty()) error("expected nonempty quoted value");
             else if(op=="id") {
                 if(v.size()>80 || v.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789-_.")!=std::string::npos) error("id must contain lowercase letters, digits, -, _ or .");
@@ -112,6 +117,7 @@ ParseResult parse(const std::string& text, const std::string& source) {
 std::string serialize(const Song& s) {
     std::ostringstream o;
     o<<"beattab 1\nid "<<std::quoted(s.id)<<"\ntitle "<<std::quoted(s.title)<<"\nartist "<<std::quoted(s.artist)<<"\nkey "<<std::quoted(s.key)<<"\ntempo "<<s.bpm<<"\ntime "<<s.meter.beats<<'/'<<s.meter.unit<<'\n';
+    if(s.capo) o<<"capo "<<*s.capo<<'\n';
     for(auto& sec:s.sections) {
         o<<"\nsection "<<std::quoted(sec.name)<<'\n';
         for(auto& b:sec.bars) {

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -30,6 +31,7 @@ struct Play { std::string section; int times = 1; };
 struct Song {
     std::string id, title, artist, key;
     int bpm = 120;
+    std::optional<int> capo; // absent = unspecified, 0 = explicitly no capo
     Meter meter;
     std::vector<Section> sections;
     std::vector<Play> order;

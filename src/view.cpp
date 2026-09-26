@@ -88,7 +88,17 @@ static void wrap(Canvas& c,int x,int y,std::string s,int width,int lines,bool bl
 Canvas render(const Song& s,const std::vector<BarRef>& refs,const Layout& l,size_t current,bool playing,Lyrics lyrics,double rate) {
     Canvas c(l.width,l.height);if(refs.empty()||current>=refs.size())return c;
     auto now=refs[current];auto& currentBar=s.sections[now.section].bars[now.bar];
-    c.text(20,16,fit(s.title,l.width-40,3),3,true);
+    c.text(20,16,fit(s.title,l.width-(s.capo?150:40),3),3,true);
+    if(s.capo) {
+        // Six strings, frets and a thick clamp: compact monochrome capo pictogram.
+        // Its geometry is symbolic; the adjacent number is the actual fret setting.
+        int x=l.width-116, y=10;
+        for(int string=0;string<6;++string)c.fill({x+3+string*5,y+3,1,29},true);
+        for(int fret=0;fret<3;++fret)c.fill({x+3,y+3+fret*13,26,1},true);
+        if(*s.capo>0) {c.fill({x,y+12,33,6},true);c.fill({x+30,y+15,3,8},true);}
+        c.text(x+43,y,"CAPO",1,true);
+        c.text(x+43,y+12,std::to_string(*s.capo),3,true);
+    }
     c.text(20,49,fit(s.sections[now.section].name+"  /  BAR "+std::to_string(now.bar+1)+"  /  "+std::to_string(int(currentBar.bpm*rate))+" QPM",l.width-210,2),2,true);
     c.text(l.width-166,49,playing?"PLAYING":"PAUSED",2,true);c.fill({20,73,l.width-40,2},true);
     for(auto& cell:l.cells) {

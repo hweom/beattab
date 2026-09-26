@@ -5,6 +5,7 @@ artist "BeatTab originals"
 key "Am"
 tempo 96
 time 4/4
+capo 2
 
 section "Verse"
 bar
